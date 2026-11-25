@@ -267,7 +267,7 @@ const canvasTex=(w,h,fn,srgb=true)=>{const c=document.createElement("canvas");c.
  const pm=new THREE.PMREMGenerator(R);S.environment=pm.fromScene(es,.02).texture;}
 
 /* ================= materials ================= */
-const TL=new THREE.TextureLoader(),MAXA=R.capabilities.getMaxAnisotropy();
+const TL0=new THREE.TextureLoader(),TL={load(url,onL,onP,onE){const tx=TL0.load(url,onL,onP,()=>{if(/^w\//.test(url)){new THREE.ImageLoader().load(url.slice(2),img=>{tx.image=img;tx.needsUpdate=true;onL&&onL(tx);},undefined,onE);}else if(onE)onE();});return tx;}},MAXA=R.capabilities.getMaxAnisotropy();
 const tex=(n,rx=1,ry=rx,srgb=false)=>{const t=TL.load("tex/"+n);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=MAXA;if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t;};
 const SCR=tex("scratch_r.jpg",2),PEEL=tex("peel_n.jpg",3),FAB_N=tex("fabric_n.jpg",7),FAB_R=tex("fabric_r.jpg",7),PAPER_N=tex("paper_n.jpg",2);
 const chrome=new THREE.MeshStandardMaterial({color:"#ffffff",metalness:1,roughness:.32,roughnessMap:SCR});
@@ -624,6 +624,7 @@ function loop(){const t=clock.getElapsedTime(),dt=Math.min(.1,t-last);last=t;
  if(dof){dof.enabled=true;dof.uniforms.aperture.value=mode==="table"?.006:.0035;dof.uniforms.maxblur.value=mode==="table"?.012:.0035;}
  if(dof){const it=ITEMS[nearest()];const tg=it.kind==="table"?tmp.set(camera.position.x,GT,camera.position.z):tmp.set(AQX-.05,1.5,it.z);const d=it.kind==="table"?camera.position.distanceTo(tg):(before(cam)?4:camera.position.distanceTo(tg));dof.uniforms.focus.value+=(d-dof.uniforms.focus.value)*.1;}
  film.uniforms.time.value=t;hud();composer.render();requestAnimationFrame(loop);}
+document.addEventListener("error",e=>{const im=e.target;if(im&&im.tagName==="IMG"&&!im.dataset.fb&&/(^|\/)w\//.test(im.getAttribute("src")||"")){im.dataset.fb=1;im.src=im.getAttribute("src").replace(/(^|\/)w\//,"$1");}},true);
 addEventListener("contextmenu",e=>{if(e.target.closest("img,canvas"))e.preventDefault();});addEventListener("dragstart",e=>{if(e.target.closest("img"))e.preventDefault();});
 window.__ok=true;loop();
 }
